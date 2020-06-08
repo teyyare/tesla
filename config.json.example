@@ -1,0 +1,15 @@
+{
+  "token": "",
+  "prefix": [
+    "t/"
+  ],
+  "playing": "",
+  "playing_type": "playing|watching|listening",
+  "status_type": "online|idle|dnd",
+  "firebase": {
+    "apiKey": "",
+    "authDomain": "",
+    "databaseURL": "",
+    "storageBucket": ""
+  }
+}

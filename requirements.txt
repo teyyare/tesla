@@ -1,0 +1,6 @@
+pip
+jishaku
+asyncio
+humanize
+firebase
+git+https://github.com/Rapptz/discord.py@master
