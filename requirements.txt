@@ -1,9 +1,9 @@
 pip
-crypto
 gcloud
 jishaku
 asyncio
 aiohttp
+pycrypto
 humanize
 firebase
 sseclient
