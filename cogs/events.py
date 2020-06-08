@@ -83,7 +83,7 @@ class Events(commands.Cog):
             _sum = 0
             reaction_count = 0
 
-        newlist = sorted(projects, key=lambda x: x.vote, reverse=True)
+        newlist = sorted(projects, key=lambda x: x.vote, reverse=True)[0:10]
 
         for p in newlist:
             content += f"**{newlist.index(p) + 1}** [{p.description}]({p.url}) • Vote: `{p.vote}`\n"
