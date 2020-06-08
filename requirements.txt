@@ -1,6 +1,10 @@
 pip
+gcloud
 jishaku
 asyncio
+aiohttp
 humanize
 firebase
+sseclient
+python_jwt
 git+https://github.com/Rapptz/discord.py@master

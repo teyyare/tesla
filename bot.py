@@ -1,4 +1,5 @@
 import json
+import aiohttp
 import discord
 from os import environ as env
 from discord.ext import commands
@@ -28,7 +29,7 @@ class Tesla(commands.Bot):
         self.uptime = ""
         self.embed_color = 0xE28274
 
-        # self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session = aiohttp.ClientSession(loop=self.loop)
 
         for cog in extensions:
             try:
