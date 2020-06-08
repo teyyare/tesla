@@ -1,4 +1,5 @@
 pip
+crypto
 gcloud
 jishaku
 asyncio
