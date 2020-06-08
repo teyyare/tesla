@@ -41,7 +41,7 @@ class Tesla(commands.Bot):
 
     @property
     def __version__(self):
-        return "1.0"
+        return "1.2"
 
     @property
     def owners(self):
