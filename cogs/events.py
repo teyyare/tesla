@@ -1,3 +1,4 @@
+import io
 import discord
 from discord import Activity
 from datetime import datetime
@@ -26,7 +27,7 @@ def setup(bot):
 class Project:
     author = object
     description = str
-    vote = int
+    vote = float
     url = str
 
 
@@ -42,25 +43,24 @@ class Events(commands.Cog):
         channel = self.bot.get_channel(self.db.get("vote_channel_id"))
         message = await channel.fetch_message(payload.message_id)
 
-        if payload.emoji.name in [_ for _ in numbers.keys()]:
-            for r in message.reactions:
-                user = await r.users().flatten()
+        for r in message.reactions:
+            user = await r.users().flatten()
 
-                if payload.user_id in [_.id for _ in user]:
-                    user_reaction_count += 1
+            if payload.user_id in [_.id for _ in user]:
+                user_reaction_count += 1
 
-                if user_reaction_count > 1:
-                    await r.clear()
-                    return
-        else:
-            pass
+            if user_reaction_count > 1:
+                await r.clear()
+                return
 
     async def manage_message(self, payload):
-        projects = []
-        content = ""
-
         _sum = 0
+        content = ""
+        projects = []
         reaction_count = 0
+
+        if not payload.emoji.name in [_ for _ in numbers.keys()]:
+            return
 
         channel = self.bot.get_channel(self.db.get("vote_channel_id"))
         messages = await channel.history(limit=None).flatten()
@@ -83,14 +83,29 @@ class Events(commands.Cog):
             _sum = 0
             reaction_count = 0
 
-        newlist = sorted(projects, key=lambda x: x.vote, reverse=True)[0:10]
+        newlist = sorted(projects, key=lambda x: x.vote, reverse=True)
 
+        for p in newlist[0:10]:
+            content += (
+                f"**`{newlist.index(p) + 1:02}`** - "
+                f"[{p.description}]({p.url}) • `{p.vote}`\n"
+            )
+
+        embed = discord.Embed(
+            title="Projects",
+            description=content,
+            color=self.bot.embed_color,
+            timestamp=datetime.utcnow(),
+        )
+        embed.set_footer(text="Last update")
+
+        content = ""
         for p in newlist:
-            content += f"**{newlist.index(p) + 1}** [{p.description}]({p.url}) • Vote: `{p.vote}`\n"
+            content += f"{newlist.index(p) + 1:02} - {p.description}\n"
 
-        embed = discord.Embed(color=self.bot.embed_color)
-        embed.title = "Projects"
-        embed.description = content
+        file = discord.File(
+            fp=io.StringIO(content), filename="full_project_list.txt"
+        )
 
         output_channel_id = self.db.get("output_channel_id")
         output_message_id = self.db.get("output_message_id")
@@ -104,6 +119,36 @@ class Events(commands.Cog):
                 output_message_id
             )
             await output_message.edit(embed=embed)
+
+        messages = await output_channel.history(limit=None).flatten()
+
+        if len(messages) <= 1:
+            await output_channel.send(file=file)
+            return
+        else:
+            await messages[0].delete()
+            await output_channel.send(file=file)
+
+    async def submit_finished_project(self, payload):
+        if payload.member.guild_permissions.manage_guild != True:
+            return
+
+        channel = self.bot.get_channel(self.db.get("vote_channel_id"))
+        message = await channel.fetch_message(payload.message_id)
+
+        embed = discord.Embed(
+            title="Ending Project",
+            description=message.content,
+            color=discord.Colour.green(),
+            timestamp=datetime.utcnow(),
+        )
+
+        ending_project_channel_id = self.db.get("ending_project_channel_id")
+        ending_project_channel = self.bot.get_channel(ending_project_channel_id)
+
+        ending_project_message = await ending_project_channel.send(embed=embed)
+        await ending_project_message.pin()
+        await message.delete()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -136,11 +181,13 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        guild_id = payload.guild_id
         channel_id = payload.channel_id
-        message_id = payload.message_id
 
         if channel_id != self.db.get("vote_channel_id"):
+            return
+
+        if payload.emoji.name == "✅":
+            await self.submit_finished_project(payload)
             return
 
         await self.reaction_check(payload)
@@ -148,9 +195,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        guild_id = payload.guild_id
         channel_id = payload.channel_id
-        message_id = payload.message_id
 
         if channel_id != self.db.get("vote_channel_id"):
             return
