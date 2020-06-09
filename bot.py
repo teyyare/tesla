@@ -17,6 +17,7 @@ extensions = [
     "cogs.info",
     "cogs.vote",
     "cogs.events",
+    "cogs.youtube"
 ]
 
 
@@ -41,7 +42,7 @@ class Tesla(commands.Bot):
 
     @property
     def __version__(self):
-        return "1.4"
+        return "2.0"
 
     @property
     def owners(self):
@@ -66,6 +67,7 @@ class Tesla(commands.Bot):
                 "playing",
                 "playing_type",
                 "status_type",
+                "yt_api_key"
             ]
             firebase_key_list = [
                 "apiKey",
