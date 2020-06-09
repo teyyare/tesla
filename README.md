@@ -1,4 +1,4 @@
-<img src="https://i.imgur.com/jMRo084.png" width="300" align="right">
+<img src="images/tesla.png" width="330" align="right">
 
 # Tesla
 
