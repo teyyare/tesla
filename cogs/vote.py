@@ -51,3 +51,26 @@ class Vote(commands.Cog):
         self.db.update({"vote_channel_id": channel.id})
 
         await ctx.send(f"Vote channel set.")
+
+    @commands.guild_only()
+    @commands.command(name="ending-project-channel")
+    async def ending_project_channel(self, ctx):
+        channel_id = self.db.get("ending_project_channel_id")
+        channel = self.bot.get_channel(channel_id)
+
+        if channel == None:
+            return await ctx.send("Invalid channel.")
+
+        await ctx.send(
+            f"Ending project channel: {channel.mention} (ID: `{channel_id}`)"
+        )
+
+    @commands.has_permissions(manage_guild=True)
+    @commands.guild_only()
+    @commands.command(name="set-ending-project-channel")
+    async def set_ending_project_channel(
+        self, ctx, channel: discord.TextChannel
+    ):
+        self.db.update({"ending_project_channel_id": channel.id})
+
+        await ctx.send(f"Ending project channel set.")
