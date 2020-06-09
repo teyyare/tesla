@@ -11,5 +11,6 @@
     "authDomain": "",
     "databaseURL": "",
     "storageBucket": ""
-  }
+  },
+  "yt_api_key":""
 }
