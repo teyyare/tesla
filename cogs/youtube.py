@@ -25,20 +25,27 @@ class Youtube(commands.Cog):
     def cog_unload(self):
         self.update_statistics.cancel()
 
-    @tasks.loop(minutes=1.0)
+    @tasks.loop(minutes=5.0)
     async def update_statistics(self):
-        channel = await self.ytda.get_channel_statistics(
+        print("Tasks...")
+        
+        try:
+            channel = await self.ytda.get_channel_statistics(
             self.youtube_channel_id
-        )
-        video = await self.ytda.get_last_video_statistics(
+            )
+            video = await self.ytda.get_last_video_statistics(
             self.youtube_channel_id
-        )
-
+            )
+            comment = await self.ytda.get_last_comment(self.youtube_channel_id)
+        except:
+            return
+            
         snippet = channel["items"][0]["snippet"]
         statistics = channel["items"][0]["statistics"]
         video_id = video["items"][0]["id"]
         video_statistics = video["items"][0]["statistics"]
-
+        top_level_comment = comment["items"][0]["snippet"]["topLevelComment"]["snippet"]
+            
         embed = discord.Embed(
             title=f"{snippet['title']} YouTube Channel Statistics",
             url="https://youtube.com/channel/{channel['items'][0]['id']}",
@@ -55,18 +62,28 @@ class Youtube(commands.Cog):
             f"Video count: `{int(statistics['videoCount']):,d}`\n"
             f"Subscriber count: `{int(statistics['subscriberCount']):,d}`\n"
             f"View count: `{int(statistics['viewCount']):,d}`\n\n"
-            f"Published date: `{self.naturaltime(snippet['publishedAt'])}`"
+            # f"Published date: `{self.naturaltime(snippet['publishedAt'])}`"
         )
 
         embed.add_field(
-            name="Latest Video",
+            name=f"Latest Video ({self.naturaltime(video['publishedAt'])})",
             value=(
                 f"Title: [{video['title']}](https://www.youtube.com/watch?v={video_id})\n\n"
                 f"View count: `{int(video_statistics['viewCount']):,d}`\n"
                 f"Like count: `{int(video_statistics['likeCount']):,d}`\n"
-                f"Dislike count: `{int(video_statistics['dislikeCount']):,d}`\n\n"
-                f"Published date: `{self.naturaltime(video['publishedAt'])}`"
+                f"Dislike count: `{int(video_statistics['dislikeCount']):,d}`"
             ),
+            inline=False,
+        )
+        
+        embed.add_field(
+            name=f"Last Comment ({self.naturaltime(top_level_comment['publishedAt'])})",
+            value=(
+                f"Author: [{top_level_comment['authorDisplayName']}]"
+                f"({top_level_comment['authorChannelUrl']})\n"
+                f"{top_level_comment['textDisplay']}"
+            ),
+            inline=False,
         )
 
         embed.set_footer(text="Last update")
