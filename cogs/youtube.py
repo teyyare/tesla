@@ -28,24 +28,26 @@ class Youtube(commands.Cog):
     @tasks.loop(minutes=5.0)
     async def update_statistics(self):
         print("Tasks...")
-        
+
         try:
             channel = await self.ytda.get_channel_statistics(
-            self.youtube_channel_id
+                self.youtube_channel_id
             )
             video = await self.ytda.get_last_video_statistics(
-            self.youtube_channel_id
+                self.youtube_channel_id
             )
             comment = await self.ytda.get_last_comment(self.youtube_channel_id)
         except:
             return
-            
+
         snippet = channel["items"][0]["snippet"]
         statistics = channel["items"][0]["statistics"]
         video_id = video["items"][0]["id"]
         video_statistics = video["items"][0]["statistics"]
-        top_level_comment = comment["items"][0]["snippet"]["topLevelComment"]["snippet"]
-            
+        top_level_comment = comment["items"][0]["snippet"]["topLevelComment"][
+            "snippet"
+        ]
+
         embed = discord.Embed(
             title=f"{snippet['title']} YouTube Channel Statistics",
             url="https://youtube.com/channel/{channel['items'][0]['id']}",
@@ -75,7 +77,7 @@ class Youtube(commands.Cog):
             ),
             inline=False,
         )
-        
+
         embed.add_field(
             name=f"Last Comment ({self.naturaltime(top_level_comment['publishedAt'])})",
             value=(

@@ -17,7 +17,7 @@ extensions = [
     "cogs.info",
     "cogs.vote",
     "cogs.events",
-    "cogs.youtube"
+    "cogs.youtube",
 ]
 
 
@@ -67,7 +67,7 @@ class Tesla(commands.Bot):
                 "playing",
                 "playing_type",
                 "status_type",
-                "yt_api_key"
+                "yt_api_key",
             ]
             firebase_key_list = [
                 "apiKey",

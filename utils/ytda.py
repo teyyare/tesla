@@ -6,7 +6,7 @@ class YouTubeDataAPI:
 
     async def get(self, params):
         async with self.session.get(self.base_url + params) as resp:
-            return await resp.json() 
+            return await resp.json()
 
     async def get_channel_statistics(self, channel_id):
         params = f"channels?key={self.api_key}&id={channel_id}&part=snippet,statistics"
@@ -31,8 +31,8 @@ class YouTubeDataAPI:
         video_statistics["publishedAt"] = snippet["publishedAt"]
 
         return video_statistics
-    
+
     async def get_last_comment(self, channel_id):
         params = f"commentThreads?key={self.api_key}&part=snippet&allThreadsRelatedToChannelId={channel_id}&maxResults=1&textFormat=plainText"
-        
+
         return await self.get(params)
