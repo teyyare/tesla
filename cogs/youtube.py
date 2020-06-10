@@ -37,7 +37,8 @@ class Youtube(commands.Cog):
                 self.youtube_channel_id
             )
             comment = await self.ytda.get_last_comment(self.youtube_channel_id)
-        except:
+        except Exception as e:
+            print("Exception:", e)
             return
 
         snippet = channel["items"][0]["snippet"]
