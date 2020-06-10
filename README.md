@@ -8,7 +8,8 @@
   <img src="https://img.shields.io/badge/code%20style-black-black">
 </p>
 
-Groups the votes added to the message
+Discord bot, which sorts and groups votes added to a message
+> Join the [Nepercos](https://discord.gg/UwHQq6U) Discord server to test.
 
 ## Requirements
 
