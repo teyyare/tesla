@@ -1,5 +1,7 @@
 import io
+import sys
 import discord
+import traceback
 from discord import Activity
 from datetime import datetime
 from utils.db import Database
@@ -177,6 +179,88 @@ class Events(commands.Cog):
         await self.bot.change_presence(
             status=status_type,
             activity=Activity(type=playing_type, name=self.config["playing"]),
+        )
+
+    @commands.Cog.listener()
+    async def on_error(self, event):
+        log_channel = self.bot.get_channel(self.bot.log_channel_id)
+
+        embed = discord.Embed(color=discord.Colour.red())
+        embed.description = f"```{event}```"
+
+        await log_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, err):
+        ignored = (commands.CommandNotFound, commands.UserInputError)
+        error = getattr(err, "original", err)
+
+        if isinstance(err, ignored):
+            return
+
+        elif hasattr(ctx.command, "on_error"):
+            return
+
+        elif isinstance(err, errors.CheckFailure):
+            return
+
+        elif isinstance(err, errors.CommandNotFound):
+            return
+
+        elif isinstance(err, commands.DisabledCommand):
+            return await ctx.send(f"{ctx.command} has been disabled.")
+
+        elif isinstance(err, errors.CommandInvokeError):
+            error = default.traceback_maker(err.original)
+
+            if (
+                "2000 or fewer" in str(err)
+                and len(ctx.message.clean_content) > 1900
+            ):
+                return await ctx.send(
+                    f"You attempted to make the command display more than 2,000 characters...\n"
+                    f"Both error and command will be ignored."
+                )
+
+            await ctx.send(
+                f"There was an error processing the command ;-;\n{error}"
+            )
+
+        elif isinstance(err, commands.NoPrivateMessage):
+            try:
+                return await ctx.author.send(
+                    f"{ctx.command} can not be used in Private Messages."
+                )
+            except:
+                pass
+
+        elif isinstance(err, errors.MissingRequiredArgument) or isinstance(
+            err, errors.BadArgument
+        ):
+            helper = (
+                str(ctx.invoked_subcommand)
+                if ctx.invoked_subcommand
+                else str(ctx.command)
+            )
+
+            await ctx.send_help(helper)
+
+        elif isinstance(err, errors.CommandOnCooldown):
+            await ctx.send(
+                f"This command is on cooldown... try again in {err.retry_after:.2f} seconds."
+            )
+
+        elif isinstance(err, errors.MaxConcurrencyReached):
+            await ctx.send(
+                f"You've reached max capacity of command usage at once, please finish the previous one..."
+            )
+
+        print(
+            "Ignoring exception in command {}:".format(ctx.command),
+            file=sys.stderr,
+        )
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
         )
 
     @commands.Cog.listener()

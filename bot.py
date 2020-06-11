@@ -29,6 +29,7 @@ class Tesla(commands.Bot):
 
         self.uptime = ""
         self.embed_color = 0xE28274
+        self.log_channel_id = 720413610811064391
 
         self.session = aiohttp.ClientSession(loop=self.loop)
 

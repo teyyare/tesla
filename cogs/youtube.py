@@ -1,3 +1,4 @@
+import sys
 import discord
 import humanize
 from datetime import datetime
@@ -21,6 +22,23 @@ class Youtube(commands.Cog):
         self.statistics_channel_id = self.db.get("statistics_channel_id")
 
         self.update_statistics.start()
+
+    def naturaltime(self, date_time):
+        native = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ")
+        return humanize.naturaltime(native)
+
+    async def send_or_edit(self, embed) -> None:
+        statistics_message_id = self.db.get("statistics_message_id")
+        channel = self.bot.get_channel(self.statistics_channel_id)
+
+        if statistics_message_id == None:
+            statistics_message = await channel.send(embed=embed)
+            self.db.update({"statistics_message_id": statistics_message.id})
+        else:
+            statistics_message = await channel.fetch_message(
+                statistics_message_id
+            )
+            await statistics_message.edit(embed=embed)
 
     def cog_unload(self):
         self.update_statistics.cancel()
@@ -99,22 +117,14 @@ class Youtube(commands.Cog):
 
         await self.bot.wait_until_ready()
 
-    def naturaltime(self, date_time):
-        native = datetime.strptime(date_time, "%Y-%m-%dT%H:%M:%SZ")
-        return humanize.naturaltime(native)
+    @update_statistics.error
+    async def error_printer(self):
+        log_channel = self.bot.get_channel(self.bot.log_channel_id)
 
-    async def send_or_edit(self, embed) -> None:
-        statistics_message_id = self.db.get("statistics_message_id")
-        channel = self.bot.get_channel(self.statistics_channel_id)
+        embed = discord.Embed(color=discord.Colour.red())
+        embed.description = f"```{sys.stderr}```"
 
-        if statistics_message_id == None:
-            statistics_message = await channel.send(embed=embed)
-            self.db.update({"statistics_message_id": statistics_message.id})
-        else:
-            statistics_message = await channel.fetch_message(
-                statistics_message_id
-            )
-            await statistics_message.edit(embed=embed)
+        await log_channel.send(embed=embed)
 
     @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
