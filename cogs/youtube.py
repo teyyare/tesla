@@ -43,7 +43,7 @@ class Youtube(commands.Cog):
     def cog_unload(self):
         self.update_statistics.cancel()
 
-    @tasks.loop(minutes=10.0)
+    @tasks.loop(minutes=15.0)
     async def update_statistics(self):
         print("Tasks...")
 
